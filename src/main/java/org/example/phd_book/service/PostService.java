@@ -2,6 +2,8 @@ package org.example.phd_book.service;
 
 import org.example.phd_book.dto.PostDTO;
 import org.example.phd_book.model.Post;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,6 +14,6 @@ public interface PostService {
     void deletePost(String id);
     PostDTO createPost(PostDTO postDTO);
     PostDTO getPost(String id);
-    List<PostDTO> findAll();
+    Page<Post> getPosts(Pageable pageable);
     PostDTO updatePost(String id, PostDTO postDTO);
 }

@@ -6,26 +6,27 @@ import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class PostDTO {
     private String id;
     private String author;
     private String title;
-    private List<String> tags;
+    private String flatTags;
     private String description;
     private int views;
-    private List<Map<String,String>> comments;
+    private String flatComments;
 
     public PostDTO() {
     }
 
-    public PostDTO(String author, String title, List<String> tags, String description, int views, List<Map<String,String>> comments) {
+    public PostDTO(String author, String title, String flatTags, String description, int views, String flatComments) {
         this.author = author;
         this.title = title;
-        this.tags = tags;
+        this.flatTags = flatTags;
         this.description = description;
         this.views = views;
-        this.comments = comments;
+        this.flatComments = flatComments;
     }
 
     public String getId() {
@@ -52,12 +53,12 @@ public class PostDTO {
         this.title = title;
     }
 
-    public List<String> getTags() {
-        return tags;
+    public String getFlatTags() {
+        return flatTags;
     }
 
-    public void setTags(List<String> tags) {
-        this.tags = tags;
+    public void setFlatTags(String flatTags) {
+        this.flatTags = flatTags;
     }
 
     public String getDescription() {
@@ -76,11 +77,12 @@ public class PostDTO {
         this.views = views;
     }
 
-    public List<Map<String,String>>getComments() {
-        return comments;
+    public String getFlatComments() {
+        return flatComments;
     }
 
-    public void setComments(List<Map<String,String>> comments) {
-        this.comments = comments;
+    public void setFlatComments(String flatComments) {
+        this.flatComments = flatComments;
     }
+
 }
