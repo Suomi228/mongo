@@ -87,8 +87,19 @@ public class PostServiceImpl implements PostService {
     @Override
     public PostDTO getPost(String id) {
         Post post = postRepo.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
-        return modelMapper.map(post, PostDTO.class);
+        PostDTO postDTO = modelMapper.map(post, PostDTO.class);
+        if (post.getTags() != null) {
+            postDTO.setFlatTags(String.join(", ", post.getTags()));
+        }
+        if (post.getComments() != null) {
+            String flatComments = post.getComments().stream()
+                    .map(comment -> comment.get("name") + ": " + comment.get("comment"))
+                    .collect(Collectors.joining("; "));
+            postDTO.setFlatComments(flatComments);
+        }
+        return postDTO;
     }
+
 
     @Override
     public Page<PostDTO> getPosts(Pageable pageable) {
@@ -96,8 +107,6 @@ public class PostServiceImpl implements PostService {
 
         return postsPage.map(post -> {
             PostDTO postDTO = modelMapper.map(post, PostDTO.class);
-
-            // Преобразуем теги и комментарии
             postDTO.setFlatTags(String.join(", ", post.getTags()));
             if (post.getComments() != null && !post.getComments().isEmpty()) {
                 String flatComments = post.getComments().stream()
@@ -114,20 +123,14 @@ public class PostServiceImpl implements PostService {
     public PostDTO updatePost(String id, PostDTO postDTO) {
         Post existingPost = postRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Post with ID " + id + " not found"));
-
-        // Обновляем основные данные
         existingPost.setAuthor(postDTO.getAuthor());
         existingPost.setTitle(postDTO.getTitle());
         existingPost.setDescription(postDTO.getDescription());
         existingPost.setViews(postDTO.getViews());
-
-        // Обновляем теги
         List<String> tags = postDTO.getFlatTags() != null
                 ? List.of(postDTO.getFlatTags().split(","))
                 : List.of();
         existingPost.setTags(tags);
-
-        // Обновляем комментарии
         if (postDTO.getFlatComments() != null && !postDTO.getFlatComments().isBlank()) {
             List<Map<String, String>> comments = List.of(postDTO.getFlatComments().split(";")).stream()
                     .map(flatComment -> {
@@ -141,11 +144,7 @@ public class PostServiceImpl implements PostService {
         } else {
             existingPost.setComments(null);
         }
-
-        // Сохранение изменений
         Post savedPost = postRepo.save(existingPost);
-
-        // Преобразование обратно в DTO
         PostDTO updatedPostDTO = modelMapper.map(savedPost, PostDTO.class);
         updatedPostDTO.setFlatTags(String.join(", ", savedPost.getTags()));
 
@@ -155,9 +154,6 @@ public class PostServiceImpl implements PostService {
                     .collect(Collectors.joining("; "));
             updatedPostDTO.setFlatComments(flatComments);
         }
-
         return updatedPostDTO;
     }
-
-
 }
