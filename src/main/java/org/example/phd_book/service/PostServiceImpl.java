@@ -91,10 +91,24 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Page<Post> getPosts(Pageable pageable) {
-        Page<Post> post = postRepo.findAll(pageable);
-        return post;
+    public Page<PostDTO> getPosts(Pageable pageable) {
+        Page<Post> postsPage = postRepo.findAll(pageable);
+
+        return postsPage.map(post -> {
+            PostDTO postDTO = modelMapper.map(post, PostDTO.class);
+
+            // Преобразуем теги и комментарии
+            postDTO.setFlatTags(String.join(", ", post.getTags()));
+            if (post.getComments() != null && !post.getComments().isEmpty()) {
+                String flatComments = post.getComments().stream()
+                        .map(comment -> comment.get("name") + ": " + comment.get("comment"))
+                        .collect(Collectors.joining("; "));
+                postDTO.setFlatComments(flatComments);
+            }
+            return postDTO;
+        });
     }
+
 
     @Override
     public PostDTO updatePost(String id, PostDTO postDTO) {

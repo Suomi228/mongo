@@ -14,6 +14,6 @@ public interface PostService {
     void deletePost(String id);
     PostDTO createPost(PostDTO postDTO);
     PostDTO getPost(String id);
-    Page<Post> getPosts(Pageable pageable);
+    Page<PostDTO> getPosts(Pageable pageable);
     PostDTO updatePost(String id, PostDTO postDTO);
 }
