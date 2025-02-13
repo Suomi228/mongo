@@ -5,6 +5,7 @@ import org.example.phd_book.model.Post;
 import org.example.phd_book.repo.PostRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -21,34 +22,27 @@ public class PostServiceImpl implements PostService {
         this.postRepo = postRepo;
         this.modelMapper = modelMapper;
     }
-
     @Override
     public List<Post> findPostByAuthor(String author) {
         return postRepo.findPostByAuthor(author);
     }
-
     @Override
     public List<Post> findPostsByViews(int views) {
         return postRepo.findPostsByViews(views);
     }
-
     @Override
     public void deletePost(String id) {
-        if (postRepo.existsById(id)) { // Проверяем, существует ли пост с данным id
+        if (postRepo.existsById(id)) {
             postRepo.deleteById(id);
         } else {
             throw new RuntimeException("Post with id " + id + " not found.");
         }
     }
-
     @Override
     public PostDTO createPost(PostDTO postDTO) {
-        // Преобразование тегов из строки в список
         List<String> tags = postDTO.getFlatTags() != null
                 ? List.of(postDTO.getFlatTags().split(","))
                 : List.of();
-
-        // Преобразование комментариев из строки в список объектов
         List<Map<String, String>> comments = postDTO.getFlatComments() != null
                 ? List.of(postDTO.getFlatComments().split(";")).stream()
                 .map(flatComment -> {
@@ -59,16 +53,11 @@ public class PostServiceImpl implements PostService {
                     );
                 }).toList()
                 : List.of();
-
-        // Создание сущности Post
         Post post = modelMapper.map(postDTO, Post.class);
         post.setTags(tags);
         post.setComments(comments);
-
-        // Сохранение в базе данных
         Post savedPost = postRepo.save(post);
 
-        // Преобразование обратно в DTO
         PostDTO savedPostDTO = modelMapper.map(savedPost, PostDTO.class);
         savedPostDTO.setFlatTags(String.join(", ", savedPost.getTags()));
 
@@ -78,12 +67,8 @@ public class PostServiceImpl implements PostService {
                     .collect(Collectors.joining("; "));
             savedPostDTO.setFlatComments(flatComments);
         }
-
         return savedPostDTO;
     }
-
-
-
     @Override
     public PostDTO getPost(String id) {
         Post post = postRepo.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
@@ -100,8 +85,8 @@ public class PostServiceImpl implements PostService {
         return postDTO;
     }
 
-
     @Override
+    @Cacheable("Page_posts")
     public Page<PostDTO> getPosts(Pageable pageable) {
         Page<Post> postsPage = postRepo.findAll(pageable);
 
@@ -117,8 +102,6 @@ public class PostServiceImpl implements PostService {
             return postDTO;
         });
     }
-
-
     @Override
     public PostDTO updatePost(String id, PostDTO postDTO) {
         Post existingPost = postRepo.findById(id)

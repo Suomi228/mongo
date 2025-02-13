@@ -2,6 +2,7 @@ package org.example.phd_book.controller;
 
 import org.example.phd_book.dto.PostDTO;
 import org.example.phd_book.service.PostService;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -42,7 +43,6 @@ public class PostController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
-
     @PutMapping("/posts/{id}")
     public PostDTO updatePost(@RequestBody PostDTO updatedPostDTO, @PathVariable String id) {
         updatedPostDTO.setId(id);

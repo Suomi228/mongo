@@ -4,11 +4,12 @@ import org.springframework.data.mongodb.core.index.IndexDirection;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class PostDTO {
+public class PostDTO implements Serializable {
     private String id;
     private String author;
     private String title;
@@ -84,5 +85,4 @@ public class PostDTO {
     public void setFlatComments(String flatComments) {
         this.flatComments = flatComments;
     }
-
 }
